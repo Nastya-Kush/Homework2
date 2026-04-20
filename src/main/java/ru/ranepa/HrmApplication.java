@@ -15,7 +15,7 @@ public class HrmApplication {
         HRMService service = new HRMService(repository);
         Menu menu = new Menu(service);
 
-        menu.showMenu();
+        menu.start();
     }
 
     private static void addTestEmployees(EmployeeRepository repository) {

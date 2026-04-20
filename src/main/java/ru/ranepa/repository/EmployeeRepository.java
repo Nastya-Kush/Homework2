@@ -2,46 +2,33 @@ package ru.ranepa.repository;
 
 import ru.ranepa.model.Employee;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class EmployeeRepository {
     private final Map<Long, Employee> employees = new HashMap<>();
+    private long nextId = 1;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    // Сохранение нового сотрудника или замена существующего по ID
-    // Возвращает true если сотрудник успешно сохранён
-    public boolean save(Employee employee) {
-        if (employee == null) {
-            return false;
+    public Employee save(Employee employee) {
+        if (employee.getId() == null) {
+            employee.setID(nextId++);
         }
-        Long id = employee.getId();
-        if (id == null) {
-            throw new IllegalArgumentException("У сотрудника должен быть id");
-        }
-        employees.put(id, employee);
-        return true;
+        employees.put(employee.getId(), employee);
+        return employee;
     }
 
-    // Получение всех сотрудников (возвращаем копию списка, чтобы избежать модификации внешним кодом)
     public List<Employee> findAll() {
         return new ArrayList<>(employees.values());
     }
 
-    // Поиск по ID, бросаем исключение если нет
-    public Employee findById(long id) {
-        Employee emp = employees.get(id);
-        if (emp == null) {
-            throw new IllegalArgumentException("Такого сотрудника нет");
-        }
-        return emp;
+    public Optional<Employee> findById(Long id) {
+        return Optional.ofNullable(employees.get(id));
     }
 
-    // Удаление по ID, возвращает true если удалили, false если не найден
     public boolean delete(Long id) {
-        if (id == null || !employees.containsKey(id)) {
-            System.out.println("Такого сотрудника нет");
+        if (!employees.containsKey(id)) {
             return false;
         }
         employees.remove(id);

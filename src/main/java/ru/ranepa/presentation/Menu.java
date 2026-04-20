@@ -1,156 +1,228 @@
 package ru.ranepa.presentation;
 
-import ru.ranepa.HrmApplication;
 import ru.ranepa.model.Employee;
 import ru.ranepa.service.HRMService;
 
-import java.io.PrintStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
 public class Menu {
     private final Scanner scanner = new Scanner(System.in);
     private final HRMService service;
-
-    public static void main(String[] args) {
-        // Устанавливаем кодировку вывода "UTF-8".
-        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        System.setOut(out);
-        HrmApplication app = new HrmApplication();
-    }
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public Menu(HRMService service) {
         this.service = service;
     }
 
-    public void showMenu() {
+    public void start() {
         while (true) {
-            System.out.println();
-            System.out.println("1 - Show all employees");
-            System.out.println("2 - Add new employee");
-            System.out.println("3 - Delete employee by ID");
-            System.out.println("4 - Find employee by ID");
-            System.out.println("5 - Statistics (average salary, top manager)");
-            System.out.println("6 - Exit");
-            System.out.print("Enter option: ");
+            printMainMenu();
+            int choice = readIntInput("Choose option: ");
 
-            String line = scanner.nextLine().trim();
-            if (line.isEmpty()) {
-                System.out.println("Please enter a command");
-                continue;
-            }
-
-            int option;
-            try {
-                option = Integer.parseInt(line);
-            } catch (NumberFormatException ex) {
-                System.out.println("Invalid input. Enter number 1-6");
-                continue;
-            }
-
-            try {
-                switch (option) {
-                    case 1 -> {
-                        String all = service.getAllEmployees();
-                        System.out.println(all.isBlank() ? "No employees." : all);
-                    }
-                    case 2 -> addEmployeeFlow();
-                    case 3 -> deleteEmployeeFlow();
-                    case 4 -> findEmployeeFlow();
-                    case 5 -> showStatistics();
-                    case 6 -> {
-                        System.out.println("Exiting...");
-                        return;
-                    }
-                    default -> System.out.println("Unknown option");
+            switch (choice) {
+                case 1 -> showAllEmployees();
+                case 2 -> addEmployee();
+                case 3 -> deleteEmployee();
+                case 4 -> findEmployeeById();
+                case 5 -> showStatistics();
+                case 6 -> filterByPosition();
+                case 7 -> showEmployeesSortedByDate();
+                case 0 -> {
+                    System.out.println("Goodbye!");
+                    return;
                 }
-            } catch (Exception ex) {
-                System.out.println("Error: " + ex.getMessage());
+                default -> System.out.println("Invalid input. Please choose option from 0 to 8.");
             }
         }
     }
 
-    private void addEmployeeFlow() {
-        try {
-            System.out.print("Enter id (numeric): ");
-            Long id = Long.parseLong(scanner.nextLine().trim());
+    private void printMainMenu() {
+        System.out.println("\nSystem Menu");
+        System.out.println("1. Show all employees");
+        System.out.println("2. Add employee");
+        System.out.println("3. Delete employee");
+        System.out.println("4. Find employee by ID");
+        System.out.println("5. Show statistics");
+        System.out.println("6. Filter employees by position");
+        System.out.println("7. Show employees sorted by hire date");
+        System.out.println("0. Exit");
+    }
 
-            System.out.print("Enter name: ");
-            String name = scanner.nextLine().trim();
+    private void showAllEmployees() {
+        List<Employee> employees = service.getAllEmployees();
+        if (employees.isEmpty()) {
+            System.out.println("Employee list is empty.");
+            return;
+        }
 
-            System.out.print("Enter position (or leave empty): ");
-            String position = scanner.nextLine().trim();
-            if (position.isEmpty()) position = null;
+        System.out.printf("%-5s %-22s %-20s %-12s %-15s%n",
+                "ID", "Name", "Position", "Salary", "Hire Date");
 
-            System.out.print("Enter salary (e.g. 1234.56): ");
-            BigDecimal salary = new BigDecimal(scanner.nextLine().trim());
+        for (Employee e : employees) {
+            System.out.printf("%-5d %-22s %-20s %-12.0f %-15s%n",
+                    e.getId(),
+                    truncateString(e.getName(), 22),
+                    truncateString(e.getPosition(), 20),
+                    e.getSalary(),
+                    e.getHireDate().format(dateFormatter));
+        }
+        System.out.println("Total employees: " + employees.size());
+    }
 
-            System.out.print("Enter hire date (yyyy-MM-dd) or leave empty for today: ");
-            String dateInput = scanner.nextLine().trim();
-            LocalDate date;
-            if (dateInput.isEmpty()) {
-                date = LocalDate.now();
-            } else {
-                try {
-                    date = LocalDate.parse(dateInput);
-                } catch (DateTimeParseException ex) {
-                    System.out.println("Invalid date format, using today");
-                    date = LocalDate.now();
-                }
-            }
+    private void showEmployeesSortedByDate() {
+        List<Employee> employees = service.getAllEmployeesSortedByHireDate();
+        if (employees.isEmpty()) {
+            System.out.println("Employee list is empty.");
+            return;
+        }
 
-            Employee emp = new Employee(id, name, position, salary, date);
-            service.addEmployee(emp);
-            System.out.println("Employee added.");
-        } catch (NumberFormatException ex) {
-            System.out.println("Invalid numeric input. Aborting add.");
-        } catch (Exception ex) {
-            System.out.println("Failed to add employee: " + ex.getMessage());
+        System.out.println("\nEmployees sorted by hire date (oldest first)");
+        System.out.printf("%-5s %-22s %-20s %-12s %-15s%n",
+                "ID", "Name", "Position", "Salary", "Hire Date");
+
+        for (Employee e : employees) {
+            System.out.printf("%-5d %-22s %-20s %-12.0f %-15s%n",
+                    e.getId(),
+                    truncateString(e.getName(), 22),
+                    truncateString(e.getPosition(), 20),
+                    e.getSalary(),
+                    e.getHireDate().format(dateFormatter));
+        }
+        System.out.println("Total employees: " + employees.size());
+    }
+
+    private void addEmployee() {
+        System.out.println("\nAdd New Employee");
+
+        String name = readStringInput("Enter name: ");
+        String position = readStringInput("Enter position: ");
+        double salary = readDoubleInput("Enter salary: ");
+        LocalDate hireDate = readDateInput("Enter hire date (dd.MM.yyyy): ");
+
+        Employee employee = new Employee(null, name, position, BigDecimal.valueOf(salary), hireDate);
+        Employee saved = service.addEmployee(employee);
+
+        System.out.printf("Employee successfully added with ID: %d%n", saved.getId());
+    }
+
+    private void deleteEmployee() {
+        System.out.println("\nDelete Employee");
+        Long id = readLongInput("Enter employee ID to delete: ");
+
+        if (service.deleteEmployee(id)) {
+            System.out.println("Employee with ID " + id + " successfully deleted.");
+        } else {
+            System.out.println("Employee with ID " + id + " not found.");
         }
     }
 
-    private void deleteEmployeeFlow() {
-        try {
-            System.out.print("Enter id to delete: ");
-            Long id = Long.parseLong(scanner.nextLine().trim());
-            boolean removed = service.deleteEmployee(id);
-            System.out.println(removed ? "Deleted." : "Employee not found.");
-        } catch (NumberFormatException ex) {
-            System.out.println("Invalid id.");
-        }
-    }
+    private void findEmployeeById() {
+        System.out.println("\nFind Employee by ID");
+        Long id = readLongInput("Enter employee ID: ");
 
-    private void findEmployeeFlow() {
-        try {
-            System.out.print("Enter id to find: ");
-            Long id = Long.parseLong(scanner.nextLine().trim());
-            Optional<Employee> opt = service.findById(id);
-            if (opt.isPresent()) {
-                Employee e = opt.get();
-                System.out.println(String.format("%d - %s (%s) - %s",
-                        e.getId(), e.getName(), e.getPosition() == null ? "-" : e.getPosition(), e.getSalary()));
-            } else {
-                System.out.println("Employee not found.");
-            }
-        } catch (NumberFormatException ex) {
-            System.out.println("Invalid id.");
+        Optional<Employee> employee = service.findById(id);
+        if (employee.isPresent()) {
+            System.out.println("\nEmployee found:");
+            System.out.println(employee.get());
+        } else {
+            System.out.println("Employee with ID " + id + " not found.");
         }
     }
 
     private void showStatistics() {
-        double avg = service.getAverageSalary();
-        System.out.println("Average salary: " + avg);
+        System.out.println("\nCompany Statistics");
+        List<Employee> employees = service.getAllEmployees();
 
-        Optional<Employee> top = service.getHighestPaidEmployee();
-        if (top.isPresent()) {
-            Employee e = top.get();
-            System.out.println("Top paid: " + e.getName() + " id=" + e.getId() + " salary=" + e.getSalary());
-        } else {
-            System.out.println("No employees to show top paid.");
+        if (employees.isEmpty()) {
+            System.out.println("No data for statistics. Employee list is empty.");
+            return;
         }
+
+        double avgSalary = service.getAverageSalary();
+        System.out.printf("Average salary in company: %.0f rub.%n", avgSalary);
+
+        Optional<Employee> topEmployee = service.findHighestPaidEmployee();
+        if (topEmployee.isPresent()) {
+            Employee top = topEmployee.get();
+            System.out.println("Highest paid employee:");
+            System.out.println("   " + top);
+        }
+    }
+
+    private void filterByPosition() {
+        System.out.println("\nFilter by Position");
+        String position = readStringInput("Enter position to filter: ");
+
+        List<Employee> filtered = service.filterByPosition(position);
+        if (filtered.isEmpty()) {
+            System.out.println("Employees with position '" + position + "' not found.");
+            return;
+        }
+
+        System.out.println("\nEmployees found: " + filtered.size());
+        for (Employee e : filtered) {
+            System.out.println(e);
+        }
+    }
+
+    private int readIntInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: please enter a valid integer.");
+            }
+        }
+    }
+
+    private long readLongInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Long.parseLong(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: please enter a valid number.");
+            }
+        }
+    }
+
+    private double readDoubleInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Double.parseDouble(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: please enter a valid number (use dot as decimal separator).");
+            }
+        }
+    }
+
+    private String readStringInput(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine().trim();
+    }
+
+    private LocalDate readDateInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return LocalDate.parse(scanner.nextLine().trim(), dateFormatter);
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: please enter date in format dd.MM.yyyy (e.g., 15.03.2024)");
+            }
+        }
+    }
+
+    private String truncateString(String str, int maxLength) {
+        if (str == null) return "";
+        if (str.length() <= maxLength) return str;
+        return str.substring(0, maxLength - 3) + "...";
     }
 }
