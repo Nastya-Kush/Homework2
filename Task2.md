@@ -20,7 +20,7 @@
 
 ```
 src/main/java/com/example/hrm/
-├── model          — JPA сущности (Employee)
+├── ru.ranepa.model          — JPA сущности (Employee)
 ├── repository     — Spring Data JPA репозитории
 ├── service        — бизнес-логика (@Service)
 ├── controller     — REST контроллеры (@RestController)

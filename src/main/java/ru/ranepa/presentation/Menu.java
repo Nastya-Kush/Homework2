@@ -1,9 +1,12 @@
 package ru.ranepa.presentation;
 
+import ru.ranepa.HrmApplication;
 import ru.ranepa.model.Employee;
 import ru.ranepa.service.HRMService;
 
+import java.io.PrintStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
@@ -12,6 +15,13 @@ import java.util.Scanner;
 public class Menu {
     private final Scanner scanner = new Scanner(System.in);
     private final HRMService service;
+
+    public static void main(String[] args) {
+        // Устанавливаем кодировку вывода "UTF-8".
+        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        System.setOut(out);
+        HrmApplication app = new HrmApplication();
+    }
 
     public Menu(HRMService service) {
         this.service = service;
