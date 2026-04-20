@@ -51,4 +51,20 @@ public class Employee {
     public Long getId() {
         return id;
     }
+
+    public void setID(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", position='" + position + '\'' +
+                ", salary=" + salary +
+                ", hireDate=" + hireDate +
+                '}';
+
+    }
 }

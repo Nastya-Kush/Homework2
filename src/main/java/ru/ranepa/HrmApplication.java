@@ -1,22 +1,28 @@
 package ru.ranepa;
-import ru.ranepa.model.Employee;
+
 import ru.ranepa.presentation.Menu;
 import ru.ranepa.repository.EmployeeRepository;
 import ru.ranepa.service.HRMService;
+import ru.ranepa.model.Employee;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 public class HrmApplication {
     public static void main(String[] args) {
-        EmployeeRepository employeeRepository = new EmployeeRepository();
-        employeeRepository.save(
-                new Employee(1L, "Sasha", "dev", BigDecimal.TEN, LocalDate.now())
-        );
-        HRMService service = new HRMService(employeeRepository);
+        EmployeeRepository repository = new EmployeeRepository();
+        addTestEmployees(repository);
+        HRMService service = new HRMService(repository);
         Menu menu = new Menu(service);
-        try {
-            menu.showMenu();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+        menu.showMenu();
+    }
+
+    private static void addTestEmployees(EmployeeRepository repository) {
+        repository.save(new Employee(null, "Kushnareva Anastasia", "Director",
+                BigDecimal.valueOf(300000), LocalDate.of(2023, 6, 20)));
+
+        repository.save(new Employee(null, "Guretscaya Daria", "Business Analyst",
+                BigDecimal.valueOf(120000), LocalDate.of(2024, 3, 6)));
     }
 }
