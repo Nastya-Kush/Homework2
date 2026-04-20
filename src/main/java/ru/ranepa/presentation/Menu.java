@@ -20,6 +20,7 @@ public class Menu {
         this.service = service;
     }
 
+    //бесконечный цикл
     public void start() {
         while (true) {
             printMainMenu();
@@ -42,6 +43,7 @@ public class Menu {
         }
     }
 
+    //пункты меню
     private void printMainMenu() {
         System.out.println("\nSystem Menu");
         System.out.println("1. Show all employees");

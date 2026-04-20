@@ -18,6 +18,7 @@ public class HrmApplication {
         menu.start();
     }
 
+    //предопределённые объекты
     private static void addTestEmployees(EmployeeRepository repository) {
         repository.save(new Employee(null, "Kushnareva Anastasia", "Director",
                 BigDecimal.valueOf(300000), LocalDate.of(2023, 6, 20)));
