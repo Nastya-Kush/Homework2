@@ -115,7 +115,7 @@ public class Menu {
         double salary = readDoubleInput("Зарплата: ");
         LocalDate hireDate = readDateInput("Дата трудоустройства: ");
 
-        Employee employee = new Employee(null, name, position, BigDecimal.valueOf(salary), hireDate);
+        Employee employee = new Employee(name, position, BigDecimal.valueOf(salary), hireDate);
         Employee saved = service.addEmployee(employee);
 
         System.out.printf("Сотрудник добавлен с ID: %d%n", saved.getId());
