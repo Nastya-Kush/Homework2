@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 
 
-@Repository
+@Repository // компонент для работы с бд
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByPosition(String position); //поиск по должности
     List<Employee> findBySalaryGreaterThanEqual(BigDecimal salary); //сотрудники с зп >= указанной

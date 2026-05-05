@@ -11,8 +11,8 @@ import static java.math.BigDecimal.ZERO;
 @Table(name = "employees")  // имя таблицы в БД
 
 public class Employee {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id // первичный ключ
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // авт. генерация
     private Long id;
     private String name;
     private String position;
@@ -33,7 +33,7 @@ public class Employee {
     }
 
     // автоматически устанавливаем дату и время создания записи
-    @PrePersist
+    @PrePersist // автоматически устанавливает createdAt
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }

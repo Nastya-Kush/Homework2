@@ -18,10 +18,8 @@ public class HrmApplication {
     @Bean
     public CommandLineRunner addTestEmployees(HRMService service) {
         return args -> {
-            // Проверяем, есть ли уже сотрудники в БД
             if (service.getAllEmployees().isEmpty()) {
 
-                // Создаем первого сотрудника
                 Employee employee1 = new Employee(
                         "Кушнарева Анастасия Алексеевна",
                         "Директор",
@@ -31,7 +29,6 @@ public class HrmApplication {
                 service.addEmployee(employee1);
                 System.out.println("Добавлен сотрудник: " + employee1.getName());
 
-                // Создаем второго сотрудника
                 Employee employee2 = new Employee(
                         "Гурецкая Дарья Дмитриевна",
                         "Бизнес аналитик",

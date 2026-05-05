@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 
-@RestController
-@RequestMapping("/api/employees")
+@RestController //класс будет обрабатывать HTTP запросы и возвращать JSON ответы
+@RequestMapping("/api/employees") //задает базовый URL для всех методов контроллера
 public class EmployeeController {
     private final HRMService employeeService;
-    @Autowired
+    @Autowired //Spring автоматически подставляет нужный сервис в конструктор
     public EmployeeController(HRMService employeeService) {
         this.employeeService = employeeService;
     }
 
     // получить список всех сотрудников
-    @GetMapping
+    @GetMapping //сопоставить URL с методом контроллера, который будет обрабатывать GET-запросы
     public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
@@ -30,7 +30,7 @@ public class EmployeeController {
 
     // получить сотрудника по id
     @GetMapping("/{id}")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) { //привязка значения из шаблона URL к параметру метода контроллера
         Optional<Employee> employee = employeeService.findById(id);
         if (employee.isPresent()) {
             return ResponseEntity.ok(employee.get());
@@ -40,17 +40,15 @@ public class EmployeeController {
     }
 
     // создать сотрудника
-    @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-        // Сервис сохранит сотрудника и вернет его с ID
+    @PostMapping //сопоставляет HTTP-запрос типа POST с методами обработчика
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) { //привязка тела HTTP-запроса к параметру в методе контроллера
         Employee savedEmployee = employeeService.addEmployee(employee);
-
         // HTTP статус 201 = ресурс создан
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
     }
 
     // удалить сотрудника
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") //сопоставить URL с методом, который будет удалять
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         boolean deleted = employeeService.deleteEmployee(id);
         if (deleted) {
